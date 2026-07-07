@@ -1,0 +1,40 @@
+{
+  "name": "clipstream-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ClipStream Phase 1: CampaignEscrow contract, PayoutRegistry, and core SQLite schema",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "test:validation": "mocha -r ts-node/register --extension ts validation/engine.test.ts",
+    "deploy:arc-testnet": "hardhat run scripts/deploy.ts --network arcTestnet",
+    "flow:arc-testnet": "hardhat run scripts/test-flow.ts --network arcTestnet",
+    "db:init": "ts-node db/init.ts",
+    "server": "ts-node scripts/run-server.ts",
+    "poller": "ts-node scripts/run-poller.ts",
+    "settlement": "ts-node scripts/run-settlement-worker.ts",
+    "pacing": "ts-node scripts/run-pacing-agent.ts",
+    "test:server": "mocha -r ts-node/register --extension ts server/pkce.test.ts server/clips.test.ts",
+    "test:settlement": "mocha -r ts-node/register --extension ts settlement/pendingSettlement.test.ts",
+    "test:pacing": "mocha -r ts-node/register --extension ts pacing/pacingEngine.test.ts",
+    "test:llm-advisor": "mocha -r ts-node/register --extension ts pacing/llmAdvisor.test.ts"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.14.0",
+    "hardhat": "^2.22.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "@openzeppelin/contracts": "^5.0.2",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.17.0",
+    "express": "^5.2.1",
+    "zod": "^4.4.3"
+  }
+}

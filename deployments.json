@@ -1,0 +1,7 @@
+{
+  "network": "arcTestnet",
+  "chainId": 5042002,
+  "campaignEscrow": "0x15EA687a8C70c2AF3AA68BA90B4B8904E7162509",
+  "payoutRegistry": "0xE52514D229038F0E159119BA76db2A3bA0963123",
+  "deployedAt": "2026-07-06T20:15:41.446Z"
+}

@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+
+node_modules/
+*.db
+*.db-shm
+*.db-wal
+
+artifacts/
+cache/
+typechain-types/
+
+*.log
+.DS_Store
