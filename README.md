@@ -2,7 +2,7 @@
 
 **Paid per view, powered by Arc.**
 
-ClipStream is a Clipping marketplace built for the Lepton Agents Hackathon (Canteen × Circle × Arc). Organizers fund a campaign in native USDC on Arc; clippers submit clips as tweet URLs and get paid per view, settled continuously as their clip's view count climbs  no CPM threshold, no monthly payout cycle, no waiting to find out if the numbers were fair.
+ClipStream is a Clipping platform built for the Lepton Agents Hackathon (Canteen × Circle × Arc). Organizers fund their Clipping campaign in native USDC on Arc; clippers submitb their clips link as tweet URLs and get paid per view, settled continuously as their clip's view count climbs  no CPM threshold, no monthly payout cycle, no waiting to find out if the numbers were fair.
 
 An autonomous Pacing Agent — a deterministic budget-allocation engine with a Claude-in-the-loop reasoning layer on top — shifts a campaign's spend toward whichever clips are actually earning engagement, in real time, within hard limits the organizer sets.
 
