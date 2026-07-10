@@ -7,8 +7,8 @@ Clippers earn as views accrue. Organizers see exactly where every dollar goes.
 
 
 **Live product:** https://clipstream-ten.vercel.app)
-**Backend:** [clipstream-backend-hgra.onrender.com](https://clipstream-backend-hgra.onrender.com)
-**Contracts (Arc Testnet, chain ID 5042002):** [`CampaignEscrow`](https://testnet.arcscan.app/address/0x15EA687a8C70c2AF3AA68BA90B4B8904E7162509) · [`PayoutRegistry`](https://testnet.arcscan.app/address/0xE52514D229038F0E159119BA76db2A3bA0963123)
+
+
 **Demo Video:** (https://x.com/Cryptoclips_/status/2074354073256497510?s=20)
 **Telegram Community:** https://t.me/Clippersarmy
 **Telegram Account:** https://x.com/Cryptoclips_
@@ -18,9 +18,9 @@ Clippers earn as views accrue. Organizers see exactly where every dollar goes.
 
 ## Overview
 
-Clipping is the biggest form of distribution in 2026 but clippers are really underpaid. A clip that goes viral on Monday and one that quietly does nothing get reconciled the same way, weeks later, in a lump sum nobody can independently verify. Organizers have no real-time visibility into whether their budget went toward genuine engagement or was just paid out blind. The floor that makes this the norm isn't malice — it's infrastructure. Settling a payment for one view has always cost more than the view was worth.
+Clipping is the biggest form of distribution in 2026 but clippers are really underpaid. Clippers get paid via a CPM basis and most time if they dont reach a minimum threshold they dont get paid or get incomplete payment also Organizers have no real time visibility into whether their budget went toward genuine engagement or was just paid out blind. 
 
-Nanopayments remove that floor. ClipStream is what becomes possible once they do: clippers submit clips and get paid per view, settled continuously in native USDC on Arc, the moment the views happen not on a CPM tier, not after a payout threshold clears. An autonomous Pacing Agent allocates each campaign's budget across competing clips in real time and shows its reasoning for every decision.
+Nanopayments remove that floor. ClipStream is what possible when you build Clippers payment Infrastructure on Arc Nanopayment Technology : Clippers submit clips and get paid per view, settled continuously in native USDC on Arc, the moment the views happen not on a CPM tier, not after a payout threshold. An autonomous Pacing Agent allocates each campaign's budget across competing clips in real time and shows its reasoning for every decision.
 
 ### ClipStream vs. other clipping platforms
 
@@ -30,7 +30,7 @@ Nanopayments remove that floor. ClipStream is what becomes possible once they do
 | **Payout unit** | Flat CPM tier, same rate regardless of performance | Per-view, Paid in USDC |
 | **Verifiability** | A dashboard number you have to trust | Every payout is a real on-chain transaction anyone can check |
 | **Budget allocation** | Manual or a fixed split decided upfront | An agent reallocates in real time with a written reason for every change |
-| **Wallet onboarding** | Seed phrases, browser extensions, or centralized custody | Email/PIN-based Circle wallet — no seed phrase |
+| **Wallet onboarding** | Seed phrases, browser extensions or centralized custody | Email/PIN-based Circle wallet, no seed phrase |
 
 ## How it works
 
@@ -47,11 +47,11 @@ View Poller (polls active clips' real view counts on an interval)
 Pacing Agent (separate interval)
    → computes each clip's engagement velocity relative to the others
      competing for the same campaign's budget
-   → adjusts each clip's effective per-view rate — boosting clips
+   → adjusts each clip's effective per-view rate boosting clips
      earning real engagement, throttling ones that aren't, always
      clamped to the organizer's rate ceiling
    → a Claude API call reviews the deterministic result per campaign,
-     proposing a bounded adjustment (±20%) with a written rationale —
+     proposing a bounded adjustment (±20%) with a written rationale 
      "LLM proposes, deterministic system disposes": the ceiling can
      never be violated regardless of what the model suggests
    → every decision, deterministic or LLM-augmented, is logged with
@@ -68,34 +68,32 @@ Settlement Worker
 
 ## How view counts are actually verified
 
-ClipStream reads view counts directly from X's own API — `GET /2/tweets/:id` with `tweet.fields=public_metrics`, using app-only Bearer authentication. This is the same `impression_count` X shows on the tweet itself; ClipStream doesn't scrape, estimate, or self-report it. Ownership is verified separately: a one-time "Sign in with X" OAuth link (minimal scopes, no posting permission) ties a clipper's wallet to their real X account, and every submitted clip's author is checked against that link via a live API call before it's accepted.
+ClipStream reads view counts directly from X's own API — `GET /2/tweets/:id` with `tweet.fields=public_metrics`, using app-only Bearer authentication. This is the same `impression_count` X shows on the tweet itself; ClipStream doesn't scrape, estimate, or self-report it. Ownership is verified separately: a one time "Sign in with X" OAuth link (minimal scopes, no posting permission) ties a clipper's wallet to their real X account and every submitted clip's author is checked against that link via a live API call before it's accepted.
 
 ## Why the Pacing Agent is genuinely agentic, not just automated
 
 A fixed formula alone is real decision-making it allocates a shared, limited budget across competing clips based on actual engagement data, not a flat split. On top of that, a real Claude API call reviews each campaign's clips together every cycle and can propose a bounded adjustment with a written rationale. From a real production run:
 
-> *"This clip has a recent rate-ceiling rejection where the computed amount of 180000 exceeded the campaign max_cpm cap. The deterministic rate of 140900 is already close to the 150000 ceiling, and the observed settlement failure suggests the effective payout is being pushed beyond the cap. A modest downward adjustment to ~119765 reduces the risk of further ceiling rejections while still rewarding this clip's strong view velocity."*
-
-The hard ceiling is enforced in code regardless of what the model returns — a system moving real money should never have an unconstrained LLM as the last word on a number, but a constrained one can add judgment a fixed formula can't.
+The hard ceiling is enforced in code regardless of what the model returns a system moving real money should never have an unconstrained LLM as the last word on a number but a constrained one can add judgment a fixed formula can't.
 
 ## Product
 
 Two roles, each with a Profile and a Campaign view:
 
-- **Clipper**: create a wallet (Circle User Controlled Wallets email + PIN, no seed phrase), link an X account, browse open campaigns, submit clips, watch a live earnings ticker, see full payout history with real transaction links. Lost your session? Recover your wallet using your linked X account — no seed phrase to lose
+- **Clipper**: create a wallet (Circle User Controlled Wallets email + PIN, no seed phrase), link an X account, browse open campaigns, submit clips, watch a live earnings ticker see full payout history with real transaction links. Lost your session? Recover your wallet using your linked X account — no seed phrase to lose
 - **Organizer**: create a real Circle-managed wallet, create and fund a campaign (with a description and source link for clippers to read before joining), set a CPM rate and a hard rate ceiling, watch the Pacing Agent's live decision feed, see aggregate spend across every campaign.
 
-## Real verification, not simulated
+## Real verification
 
 Every layer of this pipeline is deployed and proven against real infrastructure, not mocked:
 
-- **Contracts**, live on Arc Testnet: `CampaignEscrow` (`0x15EA...09`), `PayoutRegistry` (`0xE525...23`). A real settlement, triggered by real polled X view data, produced a real on-chain transfer confirmed via Blockscout — recipient balance moved, escrow balance decremented, event emitted with matching args.
+- **Contracts**, live on Arc Testnet: **Contracts (Arc Testnet, chain ID 5042002):** [`CampaignEscrow`](https://testnet.arcscan.app/address/0x15EA687a8C70c2AF3AA68BA90B4B8904E7162509) · [`PayoutRegistry`](https://testnet.arcscan.app/address/0xE52514D229038F0E159119BA76db2A3bA0963123). A real settlement, triggered by real polled X view data, produced a real on-chain transfer confirmed via Blockscout — recipient balance moved, escrow balance decremented, event emitted with matching args.
 - **A real Pacing Agent decision was traced through to a real settlement** that used its adjusted rate, not the flat base rate proving the agent's output actually changes what gets paid, not just what gets logged.
-- **Real Circle wallets**, created through the actual browser PIN flow, resolving as real, valid Arc Testnet addresses.
+- **Real Circle wallets**, created through the actual browser PIN flow, valid Arc Testnet addresses.
 - **Real X OAuth linking** ownership of a submitted clip is checked against a live X API call before it's accepted not assumed.
 - **97+ automated tests passing** across contracts (Hardhat), validation, server, settlement, pacing, and the LLM-advisor layer.
 
-Real production bugs were found and fixed against live infrastructure during development not just caught in code review including a nonce-desync bug that could hang the settlement worker, a unit-conversion mismatch that would have made every organizer deposit off by 12 orders of magnitude, and an address casing bug that made a real successful campaign invisible to its own organizer. All are documented with root cause and fix in the project's internal build log.
+Real production bugs were found and fixed against live infrastructure during development not just caught in code review including a nonce-desync bug that could hang the settlement worker, a unit-conversion mismatch that would have made every organizer deposit off by 12 orders of magnitude and an address casing bug that made a real successful campaign invisible to its own organizer. All are documented with root cause and fix in the project's internal build log.
 
 ## Deviations from `circlefin/arc-escrow`
 
@@ -104,24 +102,21 @@ Real production bugs were found and fixed against live infrastructure during dev
 - **Native currency, not ERC20.** Arc uses USDC as its native gas currency, not a token at a separate contract address. `createCampaign`/`topUp` are `payable`; `release`/`withdrawRemaining` use a low-level `call{value}` rather than `SafeERC20.safeTransfer`.
 - **`settlementId`-based idempotency.** Every `release()` and `recordPayout()` call is keyed by a unique settlement ID, checked before any transfer occurs. A retried settlement reverts rather than paying twice proven by deliberately reprocessing an already-settled row and confirming the revert.
 - **`authorizedAgent`-gated writes on both contracts.** `PayoutRegistry` initially had no access control, which would have let anyone log a fabricated payout indistinguishable from a real one caught and fixed before deployment.
-- **Reentrancy tested against a real attacking contract**, not just asserted by a modifier's presence — a `ReentrantClipper` mock attempts to re-enter `release()` from its own `receive()` hook, confirming the guard actually blocks the attack.
+- **Reentrancy tested against a real attacking contract**, not just asserted by a modifier's presence — a `ReentrantClipper` mock attempts to reenter `release()` from its own `receive()` hook, confirming the guard actually blocks the attack.
 
-## Honest scope — what this is and isn't
+## Honest scope 
 
-- View delta validation is a **heuristic plausibility check**, not fraud detection.
 - Currently supports X/Twitter as the clip source; the architecture keeps view-data reading abstracted so another platform could be added without redesigning the settlement core.
 
 ## Traction
 
-*Fill in with real numbers before submitting — pull from your dashboard/testnet data.*
-
 - **Real clippers onboarded:** [ 400 Clippers in waitlist] (https://t.me/Clippersarmy)
 - **Real organizers onboarded:** [3]
-- **Real campaigns created:** [ ]
-- **Real clips submitted:** [ ]
+- **Real campaigns created:** [3]
+- **Real clips submitted:** [10]
 - **Real settlements paid out:** [ ] transactions, totaling [ ] testnet USDC
 - **Real Pacing Agent decisions logged:** [ ], including [ ] with Claude-augmented reasoning
-- **Social proof:** [ ] (RTs, follows, or engagement on your build-in-public posts, per the hackathon's own stated traction criteria)
+- **Social proof:** [7K Followers, 400 community members,  ] 
 
 ## Tech stack
 
