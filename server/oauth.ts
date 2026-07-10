@@ -103,13 +103,17 @@ oauthRouter.get("/auth/x/start", (req: Request, res: Response) => {
  * X's redirect target after the clipper approves (or denies) the consent
  * screen. Exchanges the code for a token, looks up the authenticated user,
  * then either links that x_user_id/x_handle to the pending wallet (mode:
- * "link", unchanged from before — responds with JSON directly, since the
- * existing frontend link doesn't need anything handed back beyond a
- * confirmation) or, for mode: "recover", looks up which wallet (if any) is
- * already linked to this X account and redirects back into the frontend
- * with the result in the query string, since a recovery attempt needs to
- * hand real data back to a page that can act on it (restore localStorage),
- * which a bare JSON response can't do for a full-page redirect flow.
+ * "link") or, for mode: "recover", looks up which wallet (if any) is
+ * already linked to this X account — both modes redirect back into the
+ * frontend with the result in the query string (not a bare JSON response),
+ * since a full-page X-consent-screen redirect needs to hand real data back
+ * to a page that can act on it (show a banner, restore localStorage),
+ * which a bare JSON response can't do. mode: "link" previously returned
+ * JSON directly here — a real, confusing gap for a normal user linking X
+ * for the first time (they'd land on a raw JSON page instead of back in
+ * the app) — fixed to redirect exactly like mode: "recover" already did,
+ * using linked_handle/linked_user_id (success) or link_error (failure)
+ * instead of recovered_wallet/recovered_user_id or recovery_error.
  */
 oauthRouter.get("/auth/x/callback", async (req: Request, res: Response) => {
   const { code, state, error: oauthError } = req.query;
@@ -131,7 +135,10 @@ oauthRouter.get("/auth/x/callback", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "This linking attempt expired — restart the flow at /auth/x/start" });
   }
 
-  const recoveryRedirect = (params: Record<string, string>) => {
+  // Shared by both modes — each just passes different query param names
+  // (linked_handle/linked_user_id/link_error for "link",
+  // recovered_wallet/recovered_user_id/recovery_error for "recover").
+  const profileRedirect = (params: Record<string, string>) => {
     const url = new URL(`${FRONTEND_BASE_URL}/clipper/profile`);
     for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
     res.redirect(url.toString());
@@ -145,7 +152,7 @@ oauthRouter.get("/auth/x/callback", async (req: Request, res: Response) => {
     if (pending.mode === "recover") {
       const existing = getXAccountByXUserId(xUser.id);
       if (!existing) {
-        return recoveryRedirect({
+        return profileRedirect({
           recovery_error: `No wallet is linked to @${xUser.username} yet — create a new wallet instead.`,
         });
       }
@@ -156,11 +163,11 @@ oauthRouter.get("/auth/x/callback", async (req: Request, res: Response) => {
         // path than the Circle Wallets signup flow (e.g. a dev-seeded
         // wallet) — nothing to "resume" in that case since there's no
         // Circle-managed session to mint.
-        return recoveryRedirect({
+        return profileRedirect({
           recovery_error: `Wallet ${existing.wallet_address} is linked to @${xUser.username} but isn't a Circle-managed wallet — nothing to recover.`,
         });
       }
-      return recoveryRedirect({
+      return profileRedirect({
         recovered_wallet: existing.wallet_address,
         recovered_user_id: circleUser.circle_user_id,
       });
@@ -172,16 +179,14 @@ oauthRouter.get("/auth/x/callback", async (req: Request, res: Response) => {
       x_handle: xUser.username,
     });
 
-    res.json({
-      linked: true,
-      wallet_address: account.wallet_address,
-      x_handle: account.x_handle,
-      x_user_id: account.x_user_id,
+    return profileRedirect({
+      linked_handle: account.x_handle,
+      linked_user_id: account.x_user_id,
     });
   } catch (err: any) {
     if (pending.mode === "recover") {
-      return recoveryRedirect({ recovery_error: `Recovery failed: ${err.message}` });
+      return profileRedirect({ recovery_error: `Recovery failed: ${err.message}` });
     }
-    res.status(502).json({ error: `X account linking failed: ${err.message}` });
+    return profileRedirect({ link_error: `X account linking failed: ${err.message}` });
   }
 });

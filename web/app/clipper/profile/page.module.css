@@ -60,6 +60,13 @@
   color: #9a3427;
   font-size: 13.5px;
 }
+.successBanner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(42, 122, 74, 0.1);
+  color: #215c37;
+  font-size: 13.5px;
+}
 
 .muted {
   color: rgba(10, 10, 10, 0.4);

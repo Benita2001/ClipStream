@@ -35,25 +35,44 @@ export default function ClipperProfilePage() {
   const [refreshing, setRefreshing] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [recoveryError, setRecoveryError] = useState<string | null>(null);
+  const [linkedHandle, setLinkedHandle] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   // Picks up the redirect back from server/oauth.ts's mode=recover flow
-  // (see CLAUDE.md's Part 5 entry). Read directly off window.location
-  // rather than Next.js's useSearchParams() — this is a purely client-side,
-  // one-time, non-SEO-relevant read, and avoids that hook's Suspense-
-  // boundary requirement for a page that's otherwise fully static-eligible.
+  // (see CLAUDE.md's Part 5 entry), and now also mode=link (the default
+  // "Link your X account" flow below) — that used to respond with bare
+  // JSON straight from /auth/x/callback instead of redirecting back here,
+  // a real, confusing gap for a normal user linking X for the first time.
+  // Both modes redirect to this same page now; the query param names tell
+  // them apart. Read directly off window.location rather than Next.js's
+  // useSearchParams() — this is a purely client-side, one-time, non-SEO-
+  // relevant read, and avoids that hook's Suspense-boundary requirement
+  // for a page that's otherwise fully static-eligible.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const recoveredWallet = params.get("recovered_wallet");
     const recoveredUserId = params.get("recovered_user_id");
-    const errorParam = params.get("recovery_error");
+    const recoveryErrorParam = params.get("recovery_error");
+    const linkedHandleParam = params.get("linked_handle");
+    const linkErrorParam = params.get("link_error");
 
     if (recoveredWallet && recoveredUserId) {
       resumeRecoveredWallet(recoveredWallet, recoveredUserId, "clipper")
         .then((session) => setCircleWallet(session))
         .catch((err) => setRecoveryError(err instanceof Error ? err.message : "Failed to resume the recovered wallet"))
         .finally(() => window.history.replaceState({}, "", window.location.pathname));
-    } else if (errorParam) {
-      setRecoveryError(errorParam);
+    } else if (recoveryErrorParam) {
+      setRecoveryError(recoveryErrorParam);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (linkedHandleParam) {
+      // The link itself already happened server-side (upsertXAccount ran
+      // before this redirect) — this param only drives a one-time success
+      // banner; the "X account" section's actual linked state below comes
+      // from the normal GET /clippers/:wallet/profile fetch, not from this.
+      setLinkedHandle(linkedHandleParam);
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (linkErrorParam) {
+      setLinkError(linkErrorParam);
       window.history.replaceState({}, "", window.location.pathname);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,6 +153,10 @@ export default function ClipperProfilePage() {
       <div className={styles.wrap}>
         <RoleNav role="clipper" active="profile" />
         {recoveryError && <div className={styles.errorBanner}>{recoveryError}</div>}
+        {linkError && <div className={styles.errorBanner}>{linkError}</div>}
+        {linkedHandle && (
+          <div className={styles.successBanner}>Successfully linked X account @{linkedHandle}.</div>
+        )}
         <WalletBar {...wallet} />
 
         {activeWallet && (
