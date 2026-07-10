@@ -250,14 +250,29 @@ export interface XAccount {
   linked_at: string;
 }
 
+/**
+ * x_accounts has two independent uniqueness constraints (wallet_address as
+ * PK, x_user_id UNIQUE) — a plain ON CONFLICT(wallet_address) upsert only
+ * handles one direction (same wallet re-linking to a new X account) and
+ * throws on the other (same X account re-linking to a new wallet), which is
+ * a real flow: a clipper authenticates with the same X account again after
+ * switching wallets (e.g. moving from a placeholder/dev wallet to a real
+ * Circle wallet). Since re-linking always requires a fresh X OAuth consent
+ * screen, moving the binding is safe — it can't be done without proving
+ * ownership of the X account each time. So: clear out any existing row for
+ * this x_user_id under a different wallet first, then upsert as normal.
+ */
 export function upsertXAccount(input: { wallet_address: string; x_user_id: string; x_handle: string }): XAccount {
-  getDb()
-    .prepare(
+  const db = getDb();
+  const run = db.transaction((row: typeof input) => {
+    db.prepare(`DELETE FROM x_accounts WHERE x_user_id = ? AND wallet_address != ?`).run(row.x_user_id, row.wallet_address);
+    db.prepare(
       `INSERT INTO x_accounts (wallet_address, x_user_id, x_handle)
        VALUES (@wallet_address, @x_user_id, @x_handle)
        ON CONFLICT(wallet_address) DO UPDATE SET x_user_id = excluded.x_user_id, x_handle = excluded.x_handle`
-    )
-    .run(input);
+    ).run(row);
+  });
+  run(input);
   return getXAccountByWallet(input.wallet_address)!;
 }
 
@@ -269,6 +284,36 @@ export function getXAccountByWallet(walletAddress: string): XAccount | undefined
 
 export function getXAccountByXUserId(xUserId: string): XAccount | undefined {
   return getDb().prepare(`SELECT * FROM x_accounts WHERE x_user_id = ?`).get(xUserId) as XAccount | undefined;
+}
+
+// ---------------------------------------------------------------------------
+// circle_users — maps our wallets.address to a Circle User-Controlled
+// Wallet's userId, so a returning clipper can resume their existing Circle
+// user instead of a new one being created every visit. See schema.sql's
+// comment for why this is a separate table from `wallets` (Circle's
+// createUser happens before any address exists).
+// ---------------------------------------------------------------------------
+
+export interface CircleUser {
+  wallet_address: string;
+  circle_user_id: string;
+  created_at: string;
+}
+
+export function insertCircleUser(input: { wallet_address: string; circle_user_id: string }): CircleUser {
+  getDb()
+    .prepare(
+      `INSERT INTO circle_users (wallet_address, circle_user_id)
+       VALUES (@wallet_address, @circle_user_id)`
+    )
+    .run(input);
+  return getCircleUserByWallet(input.wallet_address)!;
+}
+
+export function getCircleUserByWallet(walletAddress: string): CircleUser | undefined {
+  return getDb()
+    .prepare(`SELECT * FROM circle_users WHERE wallet_address = ?`)
+    .get(walletAddress) as CircleUser | undefined;
 }
 
 // ---------------------------------------------------------------------------

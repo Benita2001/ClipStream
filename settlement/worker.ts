@@ -80,6 +80,23 @@ function describeError(err: any): string {
  * (one signer, rows processed one at a time, .wait() before the next send),
  * a local counter is both simpler and correct without depending on the RPC
  * layer's freshness at all after the initial fetch.
+ *
+ * peek()/confirmBroadcast() are deliberately separate calls, not one
+ * take()-and-advance — found for real, not hypothetical: a send whose gas
+ * estimation reverts (ethers throws before ever broadcasting, e.g. a
+ * pre-existing bad campaign/wallet in seed data) never actually consumes a
+ * chain nonce, but an unconditional take()-and-advance still moved the local
+ * counter past it. Every subsequent send in that cycle then requested a
+ * nonce one higher than the chain's real next nonce — a permanent gap the
+ * chain can never fill, so the next send sat in the mempool forever,
+ * unconfirmable. Reproduced live against real Arc testnet: pending
+ * settlement queued right after one that failed at gas estimation hung
+ * indefinitely (process had to be killed; chain's pending nonce never moved
+ * past latest, confirming the tx never actually broadcast). Fix: only
+ * confirmBroadcast() once a send has genuinely returned a transaction
+ * response (has a real hash) — a mined-but-reverted tx still broadcast and
+ * still consumes a nonce, so that case still advances; a pre-broadcast
+ * throw does not.
  */
 class SequentialNonceTracker {
   private next: number;
@@ -93,9 +110,14 @@ class SequentialNonceTracker {
     return new SequentialNonceTracker(startNonce);
   }
 
-  /** Returns the nonce to use for the next send, then advances the counter. */
-  take(): number {
-    return this.next++;
+  /** Returns the nonce to use for the next send. Does not advance — call confirmBroadcast() once the send is known to have gone out. */
+  peek(): number {
+    return this.next;
+  }
+
+  /** Call only after a send has actually returned a transaction response (a real hash) — i.e. it was genuinely broadcast and will consume this nonce on-chain regardless of eventual mining outcome. */
+  confirmBroadcast(): void {
+    this.next++;
   }
 }
 
@@ -213,8 +235,14 @@ export async function processPendingSettlement(
         `(campaign ${onChainCampaignId}, settlement ${pending.settlement_id})`
     );
     const releaseTx = await escrow.release(onChainCampaignId, pending.clipper_wallet, amount, pending.settlement_id, {
-      nonce: nonceTracker.take(),
+      nonce: nonceTracker.peek(),
     });
+    // escrow.release() returned a response object (a real tx hash) — the
+    // send genuinely reached the mempool, so this nonce is consumed on-chain
+    // now regardless of whether it eventually mines or reverts. Only safe to
+    // advance past this point, not before it (see SequentialNonceTracker's
+    // doc comment for the real bug this fixes).
+    nonceTracker.confirmBroadcast();
     const receipt = await releaseTx.wait();
     if (!receipt) {
       throw new Error("release() transaction did not confirm (null receipt)");
@@ -255,8 +283,9 @@ export async function processPendingSettlement(
       viewDelta,
       amount,
       rationaleHash,
-      { nonce: nonceTracker.take() }
+      { nonce: nonceTracker.peek() }
     );
+    nonceTracker.confirmBroadcast();
     await recordTx.wait();
     console.log(`[settlement] pending #${pending.id}: audit log recorded in PayoutRegistry`);
   } catch (err: any) {

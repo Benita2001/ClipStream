@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "description": "ClipStream Phase 1: CampaignEscrow contract, PayoutRegistry, and core SQLite schema",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "compile": "hardhat compile",
+    "build": "hardhat compile && tsc -p tsconfig.build.json",
     "test": "hardhat test",
     "test:validation": "mocha -r ts-node/register --extension ts validation/engine.test.ts",
     "deploy:arc-testnet": "hardhat run scripts/deploy.ts --network arcTestnet",
@@ -14,6 +18,7 @@
     "poller": "ts-node scripts/run-poller.ts",
     "settlement": "ts-node scripts/run-settlement-worker.ts",
     "pacing": "ts-node scripts/run-pacing-agent.ts",
+    "start": "npm run db:init && concurrently -n server,poller,settlement,pacing -c blue,green,yellow,magenta --restart-tries -1 --restart-after 5000 \"node dist/scripts/run-server.js\" \"sleep 8 && node dist/scripts/run-poller.js\" \"sleep 16 && node dist/scripts/run-settlement-worker.js\" \"sleep 24 && node dist/scripts/run-pacing-agent.js\"",
     "test:server": "mocha -r ts-node/register --extension ts server/pkce.test.ts server/clips.test.ts",
     "test:settlement": "mocha -r ts-node/register --extension ts settlement/pendingSettlement.test.ts",
     "test:pacing": "mocha -r ts-node/register --extension ts pacing/pacingEngine.test.ts",
@@ -22,16 +27,20 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/better-sqlite3": "^7.6.11",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^20.14.0",
+    "concurrently": "^10.0.3",
     "hardhat": "^2.22.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.0"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
+    "@circle-fin/user-controlled-wallets": "^10.8.0",
     "@openzeppelin/contracts": "^5.0.2",
     "better-sqlite3": "^11.3.0",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "ethers": "^6.17.0",
     "express": "^5.2.1",

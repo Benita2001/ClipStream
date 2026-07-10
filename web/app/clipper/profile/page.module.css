@@ -1,0 +1,347 @@
+.page {
+  min-height: 100vh;
+  background: #f5f4f1;
+}
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+.title {
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  font-size: 30px;
+  color: #0a0a0a;
+  margin: 0 0 6px;
+}
+.walletSubtitle {
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+  color: rgba(10, 10, 10, 0.4);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 16px;
+}
+
+.skeletonBlock,
+.skeletonBlockDark {
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 14px;
+}
+.skeletonBlock {
+  background: rgba(10, 10, 10, 0.04);
+  color: rgba(10, 10, 10, 0.4);
+}
+.skeletonBlockDark {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.errorBanner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(178, 59, 46, 0.1);
+  color: #9a3427;
+  font-size: 13.5px;
+}
+
+.muted {
+  color: rgba(10, 10, 10, 0.4);
+  font-weight: 400;
+}
+
+/* --- X account --- */
+.xLinked {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: #0a0a0a;
+}
+.xCheck {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(42, 122, 74, 0.15);
+  color: #215c37;
+  font-size: 12px;
+  font-weight: 700;
+}
+.xPromptText {
+  font-size: 13.5px;
+  color: rgba(10, 10, 10, 0.6);
+  line-height: 1.5;
+  margin: 0 0 16px;
+  max-width: 60ch;
+}
+.linkXBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+/* --- lifetime earnings ticker --- */
+.tickerCard {
+  background: #0a0a0a;
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.tickerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tickerLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.refreshBtn {
+  appearance: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.refreshBtn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+.refreshBtn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.refreshedAt {
+  color: rgba(255, 255, 255, 0.35);
+}
+.tickerAmount {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.tickerSub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- empty states --- */
+.emptyState {
+  text-align: center;
+  padding: 32px 16px;
+}
+.emptyTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: rgba(10, 10, 10, 0.6);
+  margin-bottom: 4px;
+}
+.emptyDesc {
+  font-size: 13px;
+  color: rgba(10, 10, 10, 0.45);
+  margin: 0 auto;
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+/* --- campaigns list --- */
+.campaignList {
+  display: flex;
+  flex-direction: column;
+}
+.campaignRow {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.6fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid rgba(10, 10, 10, 0.08);
+}
+.campaignRow:first-child {
+  border-top: none;
+}
+@media (max-width: 640px) {
+  .campaignRow {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+.campaignInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.campaignName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.pillActive,
+.pillClosed {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.pillActive {
+  color: #215c37;
+  background: rgba(42, 122, 74, 0.12);
+}
+.pillClosed {
+  color: rgba(10, 10, 10, 0.5);
+  background: rgba(10, 10, 10, 0.06);
+}
+.campaignColLabel {
+  font-size: 10.5px;
+  color: rgba(10, 10, 10, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.campaignValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.campaignValueAccent {
+  font-family: var(--font-mono), monospace;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* --- transaction history --- */
+.txList {
+  display: flex;
+  flex-direction: column;
+}
+.txRow {
+  display: grid;
+  grid-template-columns: 1.8fr 0.9fr 1.1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 0;
+  border-top: 1px solid rgba(10, 10, 10, 0.08);
+}
+.txRow:first-child {
+  border-top: none;
+}
+@media (max-width: 640px) {
+  .txRow {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+.txRef {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.txMeta {
+  font-size: 12px;
+  color: rgba(10, 10, 10, 0.4);
+  margin-top: 2px;
+}
+.txAmount {
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.txLinkCol {
+  text-align: right;
+}
+@media (max-width: 640px) {
+  .txLinkCol {
+    text-align: left;
+  }
+}
+.txLink {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(10, 10, 10, 0.25);
+}
+.txLink:hover {
+  border-color: #0a0a0a;
+}
+
+/* --- account settings --- */
+.settingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(10, 10, 10, 0.08);
+  flex-wrap: wrap;
+}
+.settingsRow:first-child {
+  border-top: none;
+}
+.settingsLabel {
+  font-size: 12.5px;
+  color: rgba(10, 10, 10, 0.5);
+  font-weight: 600;
+}
+.settingsValue {
+  font-size: 13.5px;
+  color: #0a0a0a;
+}
+.settingsValueMono {
+  font-family: var(--font-mono), monospace;
+  font-size: 12.5px;
+  color: #0a0a0a;
+  word-break: break-all;
+  text-align: right;
+}
+.forgetBtn {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12.5px;
+  color: #9a3427;
+  text-decoration: underline;
+}

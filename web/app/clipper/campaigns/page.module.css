@@ -1,0 +1,143 @@
+.page {
+  min-height: 100vh;
+  background: #f5f4f1;
+}
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+.title {
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  font-size: 30px;
+  color: #0a0a0a;
+  margin: 0 0 6px;
+}
+.subtitle {
+  font-size: 13.5px;
+  color: rgba(10, 10, 10, 0.5);
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 20px;
+  padding: 28px;
+}
+
+.skeletonBlock {
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 14px;
+  background: rgba(10, 10, 10, 0.04);
+  color: rgba(10, 10, 10, 0.4);
+}
+
+.errorBanner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(178, 59, 46, 0.1);
+  color: #9a3427;
+  font-size: 13.5px;
+}
+
+.muted {
+  color: rgba(10, 10, 10, 0.4);
+  font-weight: 400;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 16px;
+}
+.emptyTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: rgba(10, 10, 10, 0.6);
+  margin-bottom: 4px;
+}
+.emptyDesc {
+  font-size: 13px;
+  color: rgba(10, 10, 10, 0.45);
+  margin: 0 auto;
+  max-width: 48ch;
+  line-height: 1.5;
+}
+
+.campaignList {
+  display: flex;
+  flex-direction: column;
+}
+.campaignRow {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1.3fr 0.6fr 24px;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 4px;
+  margin: 0 -4px;
+  border-top: 1px solid rgba(10, 10, 10, 0.08);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.campaignRow:first-child {
+  border-top: none;
+}
+.campaignRow:hover {
+  background: rgba(10, 10, 10, 0.03);
+}
+@media (max-width: 700px) {
+  .campaignRow {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+.campaignInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.campaignName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.pillActive {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #215c37;
+  background: rgba(42, 122, 74, 0.12);
+}
+.campaignColLabel {
+  font-size: 10.5px;
+  color: rgba(10, 10, 10, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.campaignValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.campaignArrow {
+  text-align: right;
+  color: rgba(10, 10, 10, 0.25);
+  font-size: 15px;
+}
+@media (max-width: 700px) {
+  .campaignArrow {
+    display: none;
+  }
+}

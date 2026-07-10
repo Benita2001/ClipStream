@@ -1,0 +1,28 @@
+.card {
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 20px;
+  padding: 28px;
+  text-align: center;
+}
+.title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 8px;
+}
+.desc {
+  font-size: 13.5px;
+  color: rgba(10, 10, 10, 0.55);
+  max-width: 46ch;
+  margin: 0 auto 18px;
+  line-height: 1.5;
+}
+.error {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(178, 59, 46, 0.1);
+  color: #9a3427;
+  font-size: 13.5px;
+}

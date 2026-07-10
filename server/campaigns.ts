@@ -15,7 +15,7 @@ import {
   CpmRateExceedsMaxError,
   Campaign,
 } from "../db/db";
-import { getCampaignRemainingBalance, getCampaignOnChainDetails, getConfiguredAgentAddress } from "./chain";
+import { getCampaignRemainingBalance, getCampaignOnChainDetails, getConfiguredAgentAddress, getCampaignIdFromTxHash } from "./chain";
 
 export const campaignsRouter = Router();
 
@@ -185,6 +185,26 @@ campaignsRouter.get("/organizers/:wallet/campaigns", async (req: Request, res: R
     res.json({ organizer_wallet: wallet, aggregate_spend: aggregateSpend.toString(), campaigns: summaries });
   } catch (err: any) {
     res.status(502).json({ error: `Failed to read on-chain campaign balances: ${err.message}` });
+  }
+});
+
+/**
+ * Resolves the real on-chain contract_campaign_id from a confirmed
+ * createCampaign() transaction hash — the step between a Circle-wallet-
+ * signed create-campaign transaction confirming and calling POST
+ * /campaigns to index it. Kept as its own endpoint (not folded into POST
+ * /campaigns) since it reads chain state only, no DB write.
+ */
+campaignsRouter.get("/campaigns/resolve-tx/:txHash", async (req: Request, res: Response) => {
+  const txHash = req.params.txHash;
+  if (typeof txHash !== "string") {
+    return res.status(400).json({ error: "txHash path parameter must be a single string" });
+  }
+  try {
+    const contract_campaign_id = await getCampaignIdFromTxHash(txHash);
+    res.json({ contract_campaign_id });
+  } catch (err: any) {
+    res.status(502).json({ error: `Failed to resolve campaign id from tx ${txHash}: ${err.message}` });
   }
 });
 

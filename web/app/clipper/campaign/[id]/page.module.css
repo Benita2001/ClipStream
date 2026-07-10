@@ -1,0 +1,263 @@
+.page {
+  min-height: 100vh;
+  background: #f5f4f1;
+}
+.wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+}
+
+.header {
+  margin-bottom: 28px;
+}
+.title {
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  font-size: 30px;
+  color: #0a0a0a;
+  margin: 0 0 16px;
+}
+.statRow {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.stat {
+  min-width: 160px;
+}
+.statLabel {
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.45);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.statValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.muted {
+  color: rgba(10, 10, 10, 0.4);
+  font-weight: 400;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 16px;
+}
+
+.submitForm {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.input {
+  flex: 1;
+  min-width: 260px;
+  font-size: 14.5px;
+  border: 1px solid rgba(10, 10, 10, 0.15);
+  border-radius: 8px;
+  padding: 13px 16px;
+  outline: none;
+}
+.input:focus {
+  border-color: var(--accent);
+}
+
+.errorBanner {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(178, 59, 46, 0.1);
+  color: #9a3427;
+  font-size: 13.5px;
+}
+.successBanner {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(42, 122, 74, 0.1);
+  color: #215c37;
+  font-size: 13.5px;
+}
+
+.tickerCard {
+  background: #0a0a0a;
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.tickerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tickerLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.freshness {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+.pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3ecf6e;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pulse {
+    animation: pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.tickerAmount {
+  font-family: var(--font-mono), monospace;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.skeletonBlock,
+.skeletonBlockDark {
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 14px;
+}
+.skeletonBlock {
+  background: rgba(10, 10, 10, 0.04);
+  color: rgba(10, 10, 10, 0.4);
+}
+.skeletonBlockDark {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 32px 16px;
+}
+.emptyTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: rgba(10, 10, 10, 0.6);
+  margin-bottom: 4px;
+}
+.emptyDesc {
+  font-size: 13px;
+  color: rgba(10, 10, 10, 0.45);
+  margin: 0;
+}
+
+.clipList {
+  display: flex;
+  flex-direction: column;
+}
+.clipRow {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 0;
+  border-top: 1px solid rgba(10, 10, 10, 0.08);
+}
+.clipRow:first-child {
+  border-top: none;
+}
+@media (max-width: 640px) {
+  .clipRow {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+.clipName {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.clipUrl {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  color: rgba(10, 10, 10, 0.4);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.clipColLabel {
+  font-size: 10.5px;
+  color: rgba(10, 10, 10, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.clipValue {
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+.clipValueAccent {
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.clipStatus {
+  text-align: right;
+}
+@media (max-width: 640px) {
+  .clipStatus {
+    text-align: left;
+  }
+}
+.pillCapped {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a5a10;
+  background: rgba(224, 145, 47, 0.15);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.txLink {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+.txLink:hover {
+  text-decoration: underline;
+}

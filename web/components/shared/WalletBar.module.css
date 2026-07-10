@@ -1,0 +1,105 @@
+.walletBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.walletLabel {
+  font-size: 12px;
+  color: rgba(10, 10, 10, 0.5);
+  font-weight: 600;
+}
+.walletAddress {
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  color: #0a0a0a;
+}
+.linkBtn {
+  appearance: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+  color: rgba(10, 10, 10, 0.4);
+  text-decoration: underline;
+  margin-left: auto;
+}
+
+.devWalletBar {
+  background: #fff;
+  border: 1px dashed rgba(10, 10, 10, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+.devWalletLabel {
+  display: block;
+  font-size: 12px;
+  color: rgba(10, 10, 10, 0.55);
+  margin-bottom: 8px;
+}
+.devWalletRow {
+  display: flex;
+  gap: 8px;
+}
+.devWalletInput {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 13px;
+  border: 1px solid rgba(10, 10, 10, 0.15);
+  border-radius: 8px;
+  padding: 9px 12px;
+  outline: none;
+}
+.devWalletInput:focus {
+  border-color: var(--accent);
+}
+.smallBtn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* --- onboarding (no wallet yet): centered both axes, distinct from the
+   compact bars above since this is the entire page's content for a
+   first-time visitor, not a strip sitting above other sections. --- */
+.onboardingWrap {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+}
+.onboardingInner {
+  width: 100%;
+  max-width: 420px;
+}
+.welcomeHeading {
+  font-family: var(--font-display), serif;
+  font-weight: 400;
+  font-size: 34px;
+  color: #0a0a0a;
+  text-align: center;
+  margin: 0 0 20px;
+}
+.recoverLink {
+  display: block;
+  text-align: center;
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: rgba(10, 10, 10, 0.45);
+  text-decoration: underline;
+}
+.recoverLink:hover {
+  color: rgba(10, 10, 10, 0.7);
+}

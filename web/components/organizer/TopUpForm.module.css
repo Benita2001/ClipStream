@@ -1,0 +1,67 @@
+.card {
+  background: #fff;
+  border: 1px solid rgba(10, 10, 10, 0.1);
+  border-radius: 14px;
+  padding: 20px;
+}
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0a0a0a;
+  margin: 0 0 12px;
+}
+.form {
+  display: flex;
+  gap: 10px;
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 14px;
+  border: 1px solid rgba(10, 10, 10, 0.15);
+  border-radius: 8px;
+  padding: 10px 13px;
+  outline: none;
+  color: #0a0a0a;
+}
+.input:focus {
+  border-color: var(--accent);
+}
+.input:disabled {
+  opacity: 0.6;
+}
+.submitBtn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #0a0a0a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.error {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(178, 59, 46, 0.1);
+  color: #9a3427;
+  font-size: 13px;
+}
+.success {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(42, 122, 74, 0.1);
+  color: #215c37;
+  font-size: 13px;
+}
+.successLink {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}

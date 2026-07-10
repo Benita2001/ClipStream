@@ -76,6 +76,20 @@ CREATE TABLE IF NOT EXISTS x_accounts (
   PRIMARY KEY (wallet_address)
 );
 
+-- Maps our own wallets.address to Circle's userId for a Circle
+-- User-Controlled Wallet. Circle's createUser({userId}) happens before any
+-- wallet address exists (the address is only produced once the PIN+wallet
+-- creation challenge completes) — this table exists so a returning clipper
+-- can resume their existing Circle user (re-issue a session token, re-list
+-- their wallet) instead of a new Circle user getting created every visit.
+-- Mirrors x_accounts's shape/pattern deliberately.
+CREATE TABLE IF NOT EXISTS circle_users (
+  wallet_address  TEXT NOT NULL REFERENCES wallets(address),
+  circle_user_id  TEXT NOT NULL UNIQUE,
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  PRIMARY KEY (wallet_address)
+);
+
 -- Append-only: one row per View Poller read of a clip's tweet. Never UPDATE or
 -- DELETE rows here; the settlement worker diffs consecutive snapshots per clip
 -- to compute the impression_count delta that gets validated and paid out.

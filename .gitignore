@@ -10,6 +10,7 @@ node_modules/
 artifacts/
 cache/
 typechain-types/
+dist/
 
 *.log
 .DS_Store
