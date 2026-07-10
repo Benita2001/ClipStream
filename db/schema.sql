@@ -28,6 +28,13 @@ CREATE TABLE IF NOT EXISTS campaigns (
   max_duration          INTEGER NOT NULL,
   status                TEXT NOT NULL DEFAULT 'active'
                           CHECK (status IN ('active', 'closed')),
+  -- description/source_link are off-chain-only metadata, organizer-supplied
+  -- at creation — the contract has no concept of either, same category as
+  -- cpm_rate/max_cpm already being app-level-only pricing fields. Both
+  -- nullable: neither existed before this campaign creation flow, and
+  -- backfilling a value for already-indexed campaigns isn't possible.
+  description           TEXT,
+  source_link           TEXT,
   created_at            TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 

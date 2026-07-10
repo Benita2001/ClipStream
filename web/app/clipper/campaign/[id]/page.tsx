@@ -154,7 +154,10 @@ export default function ClipperCampaignPage() {
           <div className={styles.errorBanner}>{campaignError}</div>
         ) : campaign ? (
           <header className={styles.header}>
-            <h1 className={styles.title}>Campaign #{campaign.id}</h1>
+            <h1 className={styles.title}>
+              Campaign #{campaign.id}
+              {campaign.status === "closed" && <span className={styles.pillClosed}>Closed</span>}
+            </h1>
             <div className={styles.statRow}>
               <div className={styles.stat}>
                 <div className={styles.statLabel}>Current rate</div>
@@ -168,6 +171,12 @@ export default function ClipperCampaignPage() {
                 </div>
               </div>
             </div>
+            {campaign.description && <p className={styles.description}>{campaign.description}</p>}
+            {campaign.source_link && (
+              <a href={campaign.source_link} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
+                Source ↗
+              </a>
+            )}
           </header>
         ) : null}
 
@@ -175,20 +184,31 @@ export default function ClipperCampaignPage() {
         <>
         <section className={styles.card}>
           <h2 className={styles.cardTitle}>Submit a clip</h2>
-          <form onSubmit={handleSubmitClip} className={styles.submitForm}>
-            <input
-              type="text"
-              placeholder="https://x.com/handle/status/…"
-              value={tweetUrl}
-              onChange={(e) => setTweetUrl(e.target.value)}
-              className={styles.input}
-            />
-            <button type="submit" className="btn" disabled={submitState === "submitting"}>
-              {submitState === "submitting" ? "Submitting…" : "Submit"}
-            </button>
-          </form>
-          {submitMessage && (
-            <div className={submitState === "error" ? styles.errorBanner : styles.successBanner}>{submitMessage}</div>
+          {campaign?.status === "closed" ? (
+            <p className={styles.closedNotice}>
+              This campaign is closed — its pool is fully spent, so it&rsquo;s no longer accepting new clips. Existing
+              clips below keep their earnings history.
+            </p>
+          ) : (
+            <>
+              <form onSubmit={handleSubmitClip} className={styles.submitForm}>
+                <input
+                  type="text"
+                  placeholder="https://x.com/handle/status/…"
+                  value={tweetUrl}
+                  onChange={(e) => setTweetUrl(e.target.value)}
+                  className={styles.input}
+                />
+                <button type="submit" className="btn" disabled={submitState === "submitting"}>
+                  {submitState === "submitting" ? "Submitting…" : "Submit"}
+                </button>
+              </form>
+              {submitMessage && (
+                <div className={submitState === "error" ? styles.errorBanner : styles.successBanner}>
+                  {submitMessage}
+                </div>
+              )}
+            </>
           )}
         </section>
 

@@ -25,10 +25,12 @@ Every table section below explicitly lists which fields this applies to.
 | `cpm_rate` | TEXT | **bigint-as-text.** USDC base units per 1,000 views, organizer-set. |
 | `max_cpm` | TEXT | **bigint-as-text.** Hard ceiling on `cpm_rate`, enforced at campaign creation (`cpm_rate` can never exceed this). |
 | `max_duration` | INTEGER | seconds; campaign duration before `withdrawRemaining` becomes callable on-chain |
-| `status` | TEXT | `'active'` \| `'closed'` |
+| `status` | TEXT | `'active'` \| `'closed'`. Not just a static label — the Settlement Worker (`settlement/worker.ts`) flips this to `'closed'` for real, right after a `release()` call, the moment a live on-chain read of that campaign's remaining balance comes back `0`. Nothing else in this codebase ever sets it to `'closed'`. |
+| `description` | TEXT, **nullable** | Off-chain-only, organizer-supplied at creation (`POST /campaigns`). The contract has no concept of this — same category as `cpm_rate`/`max_cpm` being app-level-only. `null` if the organizer left it blank. |
+| `source_link` | TEXT, **nullable** | Off-chain-only, organizer-supplied at creation. A URL the frontend renders as a real clickable link (opens in a new tab) — not validated server-side beyond "is it a string," so treat it as untrusted user input on render (e.g. don't blindly `dangerouslySetInnerHTML` it). `null` if the organizer left it blank. |
 | `created_at` | TEXT | ISO 8601 UTC |
 
-**Nullability:** no nullable columns in this table.
+**Nullability:** `description` and `source_link` are nullable (see above); every other column is `NOT NULL`.
 
 **Real example row:**
 ```json
@@ -40,10 +42,13 @@ Every table section below explicitly lists which fields this applies to.
   "cpm_rate": "100000",
   "max_cpm": "200000",
   "max_duration": 2592000,
-  "status": "active",
+  "status": "closed",
+  "description": "Clip our launch trailer. Must include #ClipStreamLaunch in the tweet reply. No reposts of other clippers work.",
+  "source_link": "https://x.com/0x_beni_/status/1981573317736771643",
   "created_at": "2026-07-06T13:41:01.268Z"
 }
 ```
+(Real row, taken after this campaign's balance was genuinely brought to `0` by a real settlement — `status` and `description`/`source_link` shown together to make clear these are independent fields, not mutually exclusive.)
 
 **Not stored anywhere in this table**: the campaign's on-chain remaining balance. That requires a live contract read (`CampaignEscrow.getCampaignBalance(contract_campaign_id)`) — this is why `GET /campaigns` and `GET /campaigns/:id` exist as computed endpoints rather than the frontend reading this table directly.
 
@@ -318,7 +323,7 @@ Response (201): { "clip": { "id": 8, "campaign_id": 1, ... }, "ownership": "twee
 Real rejections: `400` no tweet id extractable from the URL; `404` campaign doesn't exist; `409` that tweet was already submitted as a clip; `403` the tweet's author doesn't match the submitting wallet's linked X account (includes both real author ids in the message, per the ownership-check design).
 
 ### `GET /campaigns`
-Clipper browse view: all `status = 'active'` campaigns, each enriched with a live on-chain balance read.
+Clipper browse view: **every** campaign regardless of `status`, each enriched with a live on-chain balance read. Deliberately not filtered to `status = 'active'` — an earlier version of this endpoint excluded depleted campaigns (`remaining_balance == 0`) entirely, which made a fully-funded, successfully-run campaign vanish the instant it ran out of budget rather than reading as "closed." Now a closed campaign stays in this list with `status: "closed"`; the frontend renders a muted "Closed" badge for it (still listed, still clickable through to its detail page) instead of removing it — see `app/clipper/campaigns/page.tsx`.
 ```json
 {
   "campaigns": [
@@ -329,38 +334,43 @@ Clipper browse view: all `status = 'active'` campaigns, each enriched with a liv
       "cpm_rate": "100000",
       "max_cpm": "200000",
       "max_duration": 2592000,
-      "status": "active",
+      "status": "closed",
+      "description": null,
+      "source_link": null,
       "created_at": "2026-07-06T13:41:01.268Z",
-      "remaining_balance": "9020",
-      "total_settled": "980",
+      "remaining_balance": "0",
+      "total_settled": "10000",
       "total_budget": "10000",
-      "runway_percent": 90.2,
-      "clip_count": 5,
+      "runway_percent": 0,
+      "clip_count": 6,
       "spend_velocity_last_hour": "0"
     }
   ]
 }
 ```
-`remaining_balance`, `total_settled`, `total_budget`, `spend_velocity_last_hour` are bigint-as-text. `runway_percent` is a pre-rounded display number (1 decimal) — safe to use directly, do not recompute it from the bigint fields on the frontend. `spend_velocity_last_hour` is the sum of `settlements.amount` for this campaign in the trailing 60 minutes (Organizer campaign page's spend-velocity metric) — `"0"` simply means nothing settled in the last hour, not an error.
+`remaining_balance`, `total_settled`, `total_budget`, `spend_velocity_last_hour` are bigint-as-text. `runway_percent` is a pre-rounded display number (1 decimal) — safe to use directly, do not recompute it from the bigint fields on the frontend. `spend_velocity_last_hour` is the sum of `settlements.amount` for this campaign in the trailing 60 minutes (Organizer campaign page's spend-velocity metric) — `"0"` simply means nothing settled in the last hour, not an error. `description`/`source_link` are `null` unless the organizer supplied them at creation (see `POST /campaigns` below).
 
 ### `GET /campaigns/:id`
-Same shape as one entry above, wrapped as `{ "campaign": {...} }`. 404 with `{"error": "..."}` if the id doesn't exist.
+Same shape as one entry above, wrapped as `{ "campaign": {...} }`. 404 with `{"error": "..."}` if the id doesn't exist. Not filtered by status either — this returns a closed campaign's true state just as readily as an active one's.
 
 ### `POST /campaigns`
-Organizer campaign-creation flow. **The organizer's own wallet has already called `CampaignEscrow.createCampaign` on-chain directly** (client-side signing via App Kit — this backend never holds organizer funds or signs on their behalf). This endpoint indexes the resulting on-chain campaign into SQLite and attaches the off-chain-only `cpm_rate`/`max_cpm` pricing the contract itself has no concept of.
+Organizer campaign-creation flow. **The organizer's own wallet has already called `CampaignEscrow.createCampaign` on-chain directly** (client-side signing via Circle User-Controlled Wallets — this backend never holds organizer funds or signs on their behalf). This endpoint indexes the resulting on-chain campaign into SQLite and attaches the off-chain-only `cpm_rate`/`max_cpm`/`description`/`source_link` fields the contract itself has no concept of.
 ```
-Request:  { "contract_campaign_id": "1", "cpm_rate": "80000", "max_cpm": "150000" }
+Request:  { "contract_campaign_id": "1", "cpm_rate": "80000", "max_cpm": "150000",
+            "description": "Clip our launch trailer...", "source_link": "https://x.com/..." }
 Response: { "campaign": { "id": 3, "contract_campaign_id": "1",
                           "organizer_wallet": "0x8a69D789Dc390779D0D0BffB69583F11CC3adc3E",
                           "cpm_rate": "80000", "max_cpm": "150000", "max_duration": 2592000,
-                          "status": "active", "created_at": "2026-07-07T00:56:55.708Z",
+                          "status": "active", "description": "Clip our launch trailer...",
+                          "source_link": "https://x.com/...", "created_at": "2026-07-07T00:56:55.708Z",
                           "remaining_balance": "5000", "total_settled": "0", "total_budget": "5000",
                           "runway_percent": 100, "clip_count": 0, "spend_velocity_last_hour": "0" } }
 ```
-`organizer_wallet`, `base_rate`, and `max_duration` are **not** taken from the request body — they're read from the chain itself (`CampaignEscrow.getCampaignDetails`), the actual source of truth, so a client can't misrepresent who the organizer is or what was actually deposited. Real rejection cases, all tested against genuine on-chain campaigns:
+`organizer_wallet`, `base_rate`, and `max_duration` are **not** taken from the request body — they're read from the chain itself (`CampaignEscrow.getCampaignDetails`), the actual source of truth, so a client can't misrepresent who the organizer is or what was actually deposited. `description`/`source_link` are the opposite case: purely off-chain metadata with no on-chain value to defend against, so they're accepted directly from the request body — both optional (omit, or pass `null`/a string). Real rejection cases, all tested against genuine on-chain campaigns:
 - `409` if `contract_campaign_id` is already indexed.
 - `404` if no on-chain campaign with that id exists (surfaces the real Solidity revert reason, e.g. `"execution reverted: CampaignDoesNotExist()"`).
 - `400` if `cpm_rate > max_cpm`.
+- `400` if `description` or `source_link` is present but not a string.
 - `400` if the on-chain campaign's `authorizedAgent` isn't ClipStream's own configured Settlement Agent address — such a campaign would exist on-chain but our worker could never call `release()` on it (`NotAuthorizedAgent`), silently never paying out; rejected at creation time instead of failing invisibly later.
 
 ### `GET /campaigns/:id/clips?clipper_wallet=`

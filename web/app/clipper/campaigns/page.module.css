@@ -119,6 +119,17 @@
   color: #215c37;
   background: rgba(42, 122, 74, 0.12);
 }
+.pillClosed {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: rgba(10, 10, 10, 0.5);
+  background: rgba(10, 10, 10, 0.08);
+}
 .campaignColLabel {
   font-size: 10.5px;
   color: rgba(10, 10, 10, 0.4);

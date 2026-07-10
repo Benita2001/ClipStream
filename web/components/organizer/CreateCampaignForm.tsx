@@ -17,6 +17,8 @@ export default function CreateCampaignForm({
   const [maxCpm, setMaxCpm] = useState("0.20");
   const [durationDays, setDurationDays] = useState("30");
   const [depositAmount, setDepositAmount] = useState("10");
+  const [description, setDescription] = useState("");
+  const [sourceLink, setSourceLink] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -63,6 +65,8 @@ export default function CreateCampaignForm({
         contract_campaign_id: contractCampaignId,
         cpm_rate: cpmRateBaseUnits,
         max_cpm: maxCpmBaseUnits,
+        description: description.trim() || null,
+        source_link: sourceLink.trim() || null,
       });
 
       setResult({ txHash, campaignId: campaign.id });
@@ -117,6 +121,28 @@ export default function CreateCampaignForm({
             onChange={(e) => setDepositAmount(e.target.value)}
             disabled={submitting}
             inputMode="decimal"
+          />
+        </label>
+        <label className={`${styles.field} ${styles.fieldWide}`}>
+          <span className={styles.label}>Description / Rules (optional)</span>
+          <textarea
+            className={styles.textarea}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={submitting}
+            placeholder="What clippers should know before joining — content rules, required hashtags, anything relevant."
+            rows={4}
+          />
+        </label>
+        <label className={`${styles.field} ${styles.fieldWide}`}>
+          <span className={styles.label}>Source link (optional)</span>
+          <input
+            className={styles.input}
+            value={sourceLink}
+            onChange={(e) => setSourceLink(e.target.value)}
+            disabled={submitting}
+            type="url"
+            placeholder="https://…"
           />
         </label>
         <button type="submit" className={`btn ${styles.submitBtn}`} disabled={submitting}>

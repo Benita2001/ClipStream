@@ -37,6 +37,8 @@ export interface Campaign {
   max_cpm: string; // hard ceiling on cpm_rate, enforced here at creation time
   max_duration: number;
   status: CampaignStatus;
+  description: string | null; // off-chain-only, organizer-supplied at creation — the contract has no concept of this
+  source_link: string | null; // off-chain-only, organizer-supplied at creation — same category as description
   created_at: string;
 }
 
@@ -59,16 +61,18 @@ export function insertCampaign(input: {
   max_cpm: string;
   max_duration: number;
   status?: CampaignStatus;
+  description?: string | null;
+  source_link?: string | null;
 }): Campaign {
   if (BigInt(input.cpm_rate) > BigInt(input.max_cpm)) {
     throw new CpmRateExceedsMaxError(input.cpm_rate, input.max_cpm);
   }
 
   const stmt = getDb().prepare(`
-    INSERT INTO campaigns (organizer_wallet, contract_campaign_id, base_rate, cpm_rate, max_cpm, max_duration, status)
-    VALUES (@organizer_wallet, @contract_campaign_id, @base_rate, @cpm_rate, @max_cpm, @max_duration, @status)
+    INSERT INTO campaigns (organizer_wallet, contract_campaign_id, base_rate, cpm_rate, max_cpm, max_duration, status, description, source_link)
+    VALUES (@organizer_wallet, @contract_campaign_id, @base_rate, @cpm_rate, @max_cpm, @max_duration, @status, @description, @source_link)
   `);
-  const info = stmt.run({ status: "active", ...input });
+  const info = stmt.run({ status: "active", description: null, source_link: null, ...input });
   return getCampaignById(Number(info.lastInsertRowid))!;
 }
 
@@ -91,6 +95,14 @@ export function listCampaignsByOrganizer(organizerWallet: string): Campaign[] {
 /// What the Pacing Agent iterates over each cycle.
 export function listActiveCampaigns(): Campaign[] {
   return getDb().prepare(`SELECT * FROM campaigns WHERE status = 'active' ORDER BY id ASC`).all() as Campaign[];
+}
+
+/// Every campaign regardless of status — the Clipper browse view (GET
+/// /campaigns). Deliberately not filtered to 'active' like
+/// listActiveCampaigns(): a closed campaign should stay visible with a
+/// "Closed" badge on the frontend, not disappear as if it never existed.
+export function listAllCampaigns(): Campaign[] {
+  return getDb().prepare(`SELECT * FROM campaigns ORDER BY id ASC`).all() as Campaign[];
 }
 
 export function updateCampaignStatus(id: number, status: CampaignStatus): void {

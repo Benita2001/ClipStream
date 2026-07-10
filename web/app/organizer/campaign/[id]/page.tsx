@@ -158,7 +158,16 @@ export default function OrganizerCampaignPage() {
           <div className={styles.errorBanner}>{campaignError}</div>
         ) : campaign ? (
           <header className={styles.header}>
-            <h1 className={styles.title}>Campaign #{campaign.id}</h1>
+            <h1 className={styles.title}>
+              Campaign #{campaign.id}
+              {campaign.status === "closed" && <span className={styles.pillClosed}>Closed</span>}
+            </h1>
+            {campaign.description && <p className={styles.description}>{campaign.description}</p>}
+            {campaign.source_link && (
+              <a href={campaign.source_link} target="_blank" rel="noopener noreferrer" className={styles.sourceLink}>
+                Source ↗
+              </a>
+            )}
             <div className={styles.poolCard}>
               <div className={styles.poolLabel}>Pool health</div>
               <div className={styles.poolBarTrack}>

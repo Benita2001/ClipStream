@@ -20,6 +20,8 @@ const COLUMN_MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "clips", column: "is_capped", ddl: "ALTER TABLE clips ADD COLUMN is_capped INTEGER NOT NULL DEFAULT 0" },
   { table: "clips", column: "effective_cpm_rate", ddl: "ALTER TABLE clips ADD COLUMN effective_cpm_rate TEXT" },
   { table: "agent_decisions", column: "llm_used", ddl: "ALTER TABLE agent_decisions ADD COLUMN llm_used INTEGER NOT NULL DEFAULT 0" },
+  { table: "campaigns", column: "description", ddl: "ALTER TABLE campaigns ADD COLUMN description TEXT" },
+  { table: "campaigns", column: "source_link", ddl: "ALTER TABLE campaigns ADD COLUMN source_link TEXT" },
 ];
 
 function applyColumnMigrations(db: Database.Database): void {

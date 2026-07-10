@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import {
-  listActiveCampaigns,
+  listAllCampaigns,
   getCampaignById,
   getCampaignByContractId,
   listCampaignsByOrganizer,
@@ -52,6 +52,8 @@ async function summarizeCampaign(campaign: Campaign) {
     max_cpm: campaign.max_cpm,
     max_duration: campaign.max_duration,
     status: campaign.status,
+    description: campaign.description,
+    source_link: campaign.source_link,
     created_at: campaign.created_at,
     remaining_balance: remainingBalanceStr,
     total_settled: totalSettled.toString(),
@@ -62,10 +64,23 @@ async function summarizeCampaign(campaign: Campaign) {
   };
 }
 
-/** Clipper browse view: list of open (active) campaigns. */
+/**
+ * Clipper browse view: every campaign, regardless of status.
+ *
+ * Depleted campaigns are deliberately NOT excluded here (an earlier version
+ * of this endpoint filtered out anything with remaining_balance == 0 — that
+ * hid a fully-funded, successfully-run campaign the moment it ran out of
+ * budget, which reads as "vanished" rather than "closed"). Instead, status
+ * is now a real signal: the Settlement Worker flips it to 'closed' the
+ * moment a release() leaves a campaign's on-chain balance at zero (see
+ * settlement/worker.ts). Uses listAllCampaigns() (not listActiveCampaigns(),
+ * which is what the Pacing Agent iterates and stays scoped to 'active' only)
+ * so a closed campaign stays in this list — the frontend renders a "Closed"
+ * badge for it rather than removing it, see app/clipper/campaigns/page.tsx.
+ */
 campaignsRouter.get("/campaigns", async (req: Request, res: Response) => {
   try {
-    const campaigns = listActiveCampaigns();
+    const campaigns = listAllCampaigns();
     const summaries = await Promise.all(campaigns.map(summarizeCampaign));
     res.json({ campaigns: summaries });
   } catch (err: any) {
@@ -220,14 +235,25 @@ campaignsRouter.get("/campaigns/resolve-tx/:txHash", async (req: Request, res: R
  * the request body — they're read from the chain itself via
  * getCampaignOnChainDetails, the actual source of truth, so a client can't
  * misrepresent who the organizer is or what was actually deposited.
+ *
+ * description/source_link are the opposite case: off-chain-only metadata
+ * the contract has no concept of at all (same category as cpm_rate/max_cpm),
+ * so there's no on-chain value to defend against misrepresentation of —
+ * accepted directly from the request body, both optional.
  */
 campaignsRouter.post("/campaigns", async (req: Request, res: Response) => {
-  const { contract_campaign_id, cpm_rate, max_cpm } = req.body ?? {};
+  const { contract_campaign_id, cpm_rate, max_cpm, description, source_link } = req.body ?? {};
 
   if (typeof contract_campaign_id !== "string" || typeof cpm_rate !== "string" || typeof max_cpm !== "string") {
     return res
       .status(400)
       .json({ error: "contract_campaign_id (string), cpm_rate (string), and max_cpm (string) are required" });
+  }
+  if (description !== undefined && description !== null && typeof description !== "string") {
+    return res.status(400).json({ error: "description, if provided, must be a string" });
+  }
+  if (source_link !== undefined && source_link !== null && typeof source_link !== "string") {
+    return res.status(400).json({ error: "source_link, if provided, must be a string" });
   }
 
   if (getCampaignByContractId(contract_campaign_id)) {
@@ -264,6 +290,8 @@ campaignsRouter.post("/campaigns", async (req: Request, res: Response) => {
       cpm_rate,
       max_cpm,
       max_duration: Number(onChain.maxDuration),
+      description: description ?? null,
+      source_link: source_link ?? null,
     });
     res.status(201).json({ campaign: await summarizeCampaign(campaign) });
   } catch (err: any) {

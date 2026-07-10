@@ -19,6 +19,8 @@ export interface Campaign {
   max_cpm: string;
   max_duration: number;
   status: string;
+  description: string | null;
+  source_link: string | null;
   created_at: string;
   remaining_balance: string;
   total_settled: string;
@@ -202,6 +204,8 @@ export async function indexCampaign(input: {
   contract_campaign_id: string;
   cpm_rate: string;
   max_cpm: string;
+  description?: string | null;
+  source_link?: string | null;
 }): Promise<Campaign> {
   const res = await fetch(`${API_BASE}/campaigns`, {
     method: "POST",

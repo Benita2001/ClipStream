@@ -10,6 +10,7 @@ import {
   getClipById,
   getTotalSettledAmountForClip,
   setClipCapped,
+  updateCampaignStatus,
   PendingSettlement,
 } from "../db/db";
 import { clampToRemainingCap } from "./pendingSettlement";
@@ -274,6 +275,29 @@ export async function processPendingSettlement(
     setClipCapped(pending.clip_id, true);
   }
   console.log(`[settlement] pending #${pending.id}: SETTLED — tx ${releaseReceipt.hash}`);
+
+  // campaigns.status previously never transitioned anywhere in this codebase
+  // (updateCampaignStatus existed but was uncalled) — a fully depleted
+  // campaign stayed 'active' forever, which the Clipper browse page then
+  // showed as an open opportunity indefinitely. A real on-chain balance
+  // read right after release() (the actual source of truth — a topUp()
+  // could have happened between polls, so this can't be inferred from
+  // off-chain amounts alone) is the correct trigger: if it's genuinely 0,
+  // close the campaign. Non-fatal by design — a failure here shouldn't
+  // undo or obscure the settlement that already succeeded above.
+  try {
+    const remainingBalance = await escrow.getCampaignBalance(onChainCampaignId);
+    if (remainingBalance === 0n && campaign.status !== "closed") {
+      updateCampaignStatus(campaign.id, "closed");
+      console.log(
+        `[settlement] campaign ${campaign.id} (on-chain id ${onChainCampaignId}): balance reached 0 — marked closed`
+      );
+    }
+  } catch (err: any) {
+    console.error(
+      `[settlement] campaign ${campaign.id}: failed to check/close on zero balance — ${describeError(err)}`
+    );
+  }
 
   try {
     const recordTx = await registry.recordPayout(
