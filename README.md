@@ -5,9 +5,12 @@
 No CPM thresholds. No payout minimums.
 Clippers earn as views accrue. Organizers see exactly where every dollar goes.
 
-**Live product:** https://clipstream-ten.vercel.app)
-**Demo Video:** (https://x.com/Cryptoclips_/status/2074354073256497510?s=20)
+**Live product:** https://clipstream-ten.vercel.app
+
+**Demo Video:** https://x.com/Cryptoclips_/status/2074354073256497510?s=20
+
 **Telegram Community:** https://t.me/Clippersarmy
+
 **Telegram Account:** https://x.com/Cryptoclips_
 
 <img width="1200" height="1200" alt="image" src="https://github.com/user-attachments/assets/2236d0d3-f24d-4e8b-8617-252e88cf2475" />
