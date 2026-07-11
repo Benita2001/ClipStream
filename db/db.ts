@@ -30,6 +30,7 @@ export type CampaignStatus = "active" | "closed";
 
 export interface Campaign {
   id: number;
+  name: string; // organizer-supplied, required, off-chain-only — the primary headline everywhere a campaign is shown
   organizer_wallet: string;
   contract_campaign_id: string; // uint256 as string — see storage convention note in schema.sql
   base_rate: number;
@@ -54,6 +55,7 @@ export class CpmRateExceedsMaxError extends Error {
 /// the Settlement Worker adds a second, defensive check for once the Pacing
 /// Agent starts adjusting rates later.
 export function insertCampaign(input: {
+  name: string;
   organizer_wallet: string;
   contract_campaign_id: string;
   base_rate: number;
@@ -69,8 +71,8 @@ export function insertCampaign(input: {
   }
 
   const stmt = getDb().prepare(`
-    INSERT INTO campaigns (organizer_wallet, contract_campaign_id, base_rate, cpm_rate, max_cpm, max_duration, status, description, source_link)
-    VALUES (@organizer_wallet, @contract_campaign_id, @base_rate, @cpm_rate, @max_cpm, @max_duration, @status, @description, @source_link)
+    INSERT INTO campaigns (name, organizer_wallet, contract_campaign_id, base_rate, cpm_rate, max_cpm, max_duration, status, description, source_link)
+    VALUES (@name, @organizer_wallet, @contract_campaign_id, @base_rate, @cpm_rate, @max_cpm, @max_duration, @status, @description, @source_link)
   `);
   const info = stmt.run({ status: "active", description: null, source_link: null, ...input });
   return getCampaignById(Number(info.lastInsertRowid))!;

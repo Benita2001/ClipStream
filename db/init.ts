@@ -22,6 +22,15 @@ const COLUMN_MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "agent_decisions", column: "llm_used", ddl: "ALTER TABLE agent_decisions ADD COLUMN llm_used INTEGER NOT NULL DEFAULT 0" },
   { table: "campaigns", column: "description", ddl: "ALTER TABLE campaigns ADD COLUMN description TEXT" },
   { table: "campaigns", column: "source_link", ddl: "ALTER TABLE campaigns ADD COLUMN source_link TEXT" },
+  // NOT NULL with a placeholder DEFAULT — existing rows indexed before this
+  // column existed get "Untitled Campaign" rather than breaking the
+  // NOT NULL constraint or being left NULL (name is required going forward,
+  // see insertCampaign/POST /campaigns).
+  {
+    table: "campaigns",
+    column: "name",
+    ddl: "ALTER TABLE campaigns ADD COLUMN name TEXT NOT NULL DEFAULT 'Untitled Campaign'",
+  },
 ];
 
 function applyColumnMigrations(db: Database.Database): void {

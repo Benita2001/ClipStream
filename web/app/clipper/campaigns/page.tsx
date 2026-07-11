@@ -68,7 +68,9 @@ export default function ClipperCampaignsPage() {
               {campaigns?.map((c) => (
                 <Link key={c.id} href={`/clipper/campaign/${c.id}`} className={styles.campaignRow}>
                   <div className={styles.campaignInfo}>
-                    <div className={styles.campaignName}>Campaign #{c.id}</div>
+                    <div className={styles.campaignName}>
+                      {c.name} <span className={styles.muted}>#{c.id}</span>
+                    </div>
                     {c.status === "closed" ? (
                       <span className={styles.pillClosed}>Closed</span>
                     ) : (

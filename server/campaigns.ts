@@ -46,6 +46,7 @@ async function summarizeCampaign(campaign: Campaign) {
 
   return {
     id: campaign.id,
+    name: campaign.name,
     contract_campaign_id: campaign.contract_campaign_id,
     organizer_wallet: campaign.organizer_wallet,
     cpm_rate: campaign.cpm_rate,
@@ -242,12 +243,15 @@ campaignsRouter.get("/campaigns/resolve-tx/:txHash", async (req: Request, res: R
  * accepted directly from the request body, both optional.
  */
 campaignsRouter.post("/campaigns", async (req: Request, res: Response) => {
-  const { contract_campaign_id, cpm_rate, max_cpm, description, source_link } = req.body ?? {};
+  const { name, contract_campaign_id, cpm_rate, max_cpm, description, source_link } = req.body ?? {};
 
   if (typeof contract_campaign_id !== "string" || typeof cpm_rate !== "string" || typeof max_cpm !== "string") {
     return res
       .status(400)
       .json({ error: "contract_campaign_id (string), cpm_rate (string), and max_cpm (string) are required" });
+  }
+  if (typeof name !== "string" || name.trim().length === 0) {
+    return res.status(400).json({ error: "name (non-empty string) is required" });
   }
   if (description !== undefined && description !== null && typeof description !== "string") {
     return res.status(400).json({ error: "description, if provided, must be a string" });
@@ -284,6 +288,7 @@ campaignsRouter.post("/campaigns", async (req: Request, res: Response) => {
 
   try {
     const campaign = insertCampaign({
+      name: name.trim(),
       organizer_wallet: onChain.organizer,
       contract_campaign_id,
       base_rate: Number(onChain.baseRate),

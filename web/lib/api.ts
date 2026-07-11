@@ -13,6 +13,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"
 
 export interface Campaign {
   id: number;
+  name: string;
   contract_campaign_id: string;
   organizer_wallet: string;
   cpm_rate: string;
@@ -201,6 +202,7 @@ export async function fetchClipperSettlements(wallet: string): Promise<ClipperSe
 
 /** Indexes a just-confirmed on-chain createCampaign() into SQLite, attaching the off-chain-only cpm_rate/max_cpm pricing. */
 export async function indexCampaign(input: {
+  name: string;
   contract_campaign_id: string;
   cpm_rate: string;
   max_cpm: string;

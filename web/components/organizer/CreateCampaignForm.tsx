@@ -13,6 +13,7 @@ export default function CreateCampaignForm({
 }: {
   onCreated: (campaignId: number, organizerWallet: string) => void;
 }) {
+  const [name, setName] = useState("");
   const [cpmRate, setCpmRate] = useState("0.10");
   const [maxCpm, setMaxCpm] = useState("0.20");
   const [durationDays, setDurationDays] = useState("30");
@@ -32,6 +33,10 @@ export default function CreateCampaignForm({
     setError(null);
     setResult(null);
     try {
+      const trimmedName = name.trim();
+      if (trimmedName.length === 0) {
+        throw new Error("Campaign name is required");
+      }
       const cpmRateBaseUnits = parseUsdcToBaseUnits(cpmRate);
       const maxCpmBaseUnits = parseUsdcToBaseUnits(maxCpm);
       const depositBaseUnits = parseUsdcToBaseUnits(depositAmount);
@@ -62,6 +67,7 @@ export default function CreateCampaignForm({
 
       setStatus("Indexing the campaign…");
       const campaign = await indexCampaign({
+        name: trimmedName,
         contract_campaign_id: contractCampaignId,
         cpm_rate: cpmRateBaseUnits,
         max_cpm: maxCpmBaseUnits,
@@ -83,6 +89,17 @@ export default function CreateCampaignForm({
     <div className={styles.card}>
       <h2 className={styles.cardTitle}>Create a campaign</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
+        <label className={`${styles.field} ${styles.fieldWide}`}>
+          <span className={styles.label}>Campaign name</span>
+          <input
+            className={styles.input}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            disabled={submitting}
+            placeholder="e.g. Clips for Ishowspeed"
+            required
+          />
+        </label>
         <label className={styles.field}>
           <span className={styles.label}>Rate ($ per 1,000 views)</span>
           <input

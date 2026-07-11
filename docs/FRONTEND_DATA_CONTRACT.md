@@ -19,6 +19,7 @@ Every table section below explicitly lists which fields this applies to.
 | Column | Type | Notes |
 |---|---|---|
 | `id` | INTEGER PK | ClipStream's own row id — **not** the on-chain campaign id, see `contract_campaign_id` |
+| `name` | TEXT | Organizer-supplied, **required** (`POST /campaigns` rejects a missing/empty value), off-chain-only — the primary headline everywhere a campaign is shown in the frontend (with `#id` as a small secondary label). Rows indexed before this column existed were backfilled to `"Untitled Campaign"` via the `ADD COLUMN ... DEFAULT` migration, not left blank. |
 | `organizer_wallet` | TEXT | organizer's wallet address |
 | `contract_campaign_id` | TEXT, UNIQUE | **bigint-as-text.** The on-chain `CampaignEscrow` campaign id (a `uint256`). Currently small integers-as-strings like `"0"`, but must never be parsed as `Number` and used in further math — pass it straight through to any contract read. |
 | `base_rate` | INTEGER | Mirrors the value passed to the on-chain constructor at creation. **Not** what payouts are derived from — kept for historical/on-chain-parity reasons only. Ignore this for any rate display; use `cpm_rate`. |
@@ -36,6 +37,7 @@ Every table section below explicitly lists which fields this applies to.
 ```json
 {
   "id": 1,
+  "name": "Launch Trailer Clips",
   "organizer_wallet": "0x8a69D789Dc390779D0D0BffB69583F11CC3adc3E",
   "contract_campaign_id": "0",
   "base_rate": 100,
@@ -329,6 +331,7 @@ Clipper browse view: **every** campaign regardless of `status`, each enriched wi
   "campaigns": [
     {
       "id": 1,
+      "name": "Launch Trailer Clips",
       "contract_campaign_id": "0",
       "organizer_wallet": "0x8a69D789Dc390779D0D0BffB69583F11CC3adc3E",
       "cpm_rate": "100000",
@@ -348,17 +351,17 @@ Clipper browse view: **every** campaign regardless of `status`, each enriched wi
   ]
 }
 ```
-`remaining_balance`, `total_settled`, `total_budget`, `spend_velocity_last_hour` are bigint-as-text. `runway_percent` is a pre-rounded display number (1 decimal) — safe to use directly, do not recompute it from the bigint fields on the frontend. `spend_velocity_last_hour` is the sum of `settlements.amount` for this campaign in the trailing 60 minutes (Organizer campaign page's spend-velocity metric) — `"0"` simply means nothing settled in the last hour, not an error. `description`/`source_link` are `null` unless the organizer supplied them at creation (see `POST /campaigns` below).
+`remaining_balance`, `total_settled`, `total_budget`, `spend_velocity_last_hour` are bigint-as-text. `runway_percent` is a pre-rounded display number (1 decimal) — safe to use directly, do not recompute it from the bigint fields on the frontend. `spend_velocity_last_hour` is the sum of `settlements.amount` for this campaign in the trailing 60 minutes (Organizer campaign page's spend-velocity metric) — `"0"` simply means nothing settled in the last hour, not an error. `description`/`source_link` are `null` unless the organizer supplied them at creation (see `POST /campaigns` below). `name` is never `null` — rows indexed before it existed were backfilled to `"Untitled Campaign"`.
 
 ### `GET /campaigns/:id`
 Same shape as one entry above, wrapped as `{ "campaign": {...} }`. 404 with `{"error": "..."}` if the id doesn't exist. Not filtered by status either — this returns a closed campaign's true state just as readily as an active one's.
 
 ### `POST /campaigns`
-Organizer campaign-creation flow. **The organizer's own wallet has already called `CampaignEscrow.createCampaign` on-chain directly** (client-side signing via Circle User-Controlled Wallets — this backend never holds organizer funds or signs on their behalf). This endpoint indexes the resulting on-chain campaign into SQLite and attaches the off-chain-only `cpm_rate`/`max_cpm`/`description`/`source_link` fields the contract itself has no concept of.
+Organizer campaign-creation flow. **The organizer's own wallet has already called `CampaignEscrow.createCampaign` on-chain directly** (client-side signing via Circle User-Controlled Wallets — this backend never holds organizer funds or signs on their behalf). This endpoint indexes the resulting on-chain campaign into SQLite and attaches the off-chain-only `name`/`cpm_rate`/`max_cpm`/`description`/`source_link` fields the contract itself has no concept of.
 ```
-Request:  { "contract_campaign_id": "1", "cpm_rate": "80000", "max_cpm": "150000",
+Request:  { "name": "Launch Trailer Clips", "contract_campaign_id": "1", "cpm_rate": "80000", "max_cpm": "150000",
             "description": "Clip our launch trailer...", "source_link": "https://x.com/..." }
-Response: { "campaign": { "id": 3, "contract_campaign_id": "1",
+Response: { "campaign": { "id": 3, "name": "Launch Trailer Clips", "contract_campaign_id": "1",
                           "organizer_wallet": "0x8a69D789Dc390779D0D0BffB69583F11CC3adc3E",
                           "cpm_rate": "80000", "max_cpm": "150000", "max_duration": 2592000,
                           "status": "active", "description": "Clip our launch trailer...",
@@ -366,7 +369,8 @@ Response: { "campaign": { "id": 3, "contract_campaign_id": "1",
                           "remaining_balance": "5000", "total_settled": "0", "total_budget": "5000",
                           "runway_percent": 100, "clip_count": 0, "spend_velocity_last_hour": "0" } }
 ```
-`organizer_wallet`, `base_rate`, and `max_duration` are **not** taken from the request body — they're read from the chain itself (`CampaignEscrow.getCampaignDetails`), the actual source of truth, so a client can't misrepresent who the organizer is or what was actually deposited. `description`/`source_link` are the opposite case: purely off-chain metadata with no on-chain value to defend against, so they're accepted directly from the request body — both optional (omit, or pass `null`/a string). Real rejection cases, all tested against genuine on-chain campaigns:
+`organizer_wallet`, `base_rate`, and `max_duration` are **not** taken from the request body — they're read from the chain itself (`CampaignEscrow.getCampaignDetails`), the actual source of truth, so a client can't misrepresent who the organizer is or what was actually deposited. `name`/`description`/`source_link` are the opposite case: purely off-chain metadata with no on-chain value to defend against, so they're accepted directly from the request body. Unlike `description`/`source_link` (both optional — omit, or pass `null`/a string), `name` is **required**: a missing or empty/whitespace-only value gets a `400`. Real rejection cases, all tested against genuine on-chain campaigns:
+- `400` if `name` is missing, not a string, or empty/whitespace-only.
 - `409` if `contract_campaign_id` is already indexed.
 - `404` if no on-chain campaign with that id exists (surfaces the real Solidity revert reason, e.g. `"execution reverted: CampaignDoesNotExist()"`).
 - `400` if `cpm_rate > max_cpm`.

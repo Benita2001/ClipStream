@@ -155,7 +155,8 @@ export default function ClipperCampaignPage() {
         ) : campaign ? (
           <header className={styles.header}>
             <h1 className={styles.title}>
-              Campaign #{campaign.id}
+              {campaign.name}
+              <span className={styles.titleId}>#{campaign.id}</span>
               {campaign.status === "closed" && <span className={styles.pillClosed}>Closed</span>}
             </h1>
             <div className={styles.statRow}>

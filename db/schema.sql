@@ -20,6 +20,12 @@
 -- the View Poller.
 CREATE TABLE IF NOT EXISTS campaigns (
   id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+  -- Organizer-supplied, off-chain-only, required (unlike description/
+  -- source_link below) — this is the primary headline everywhere a
+  -- campaign is shown, replacing the "Campaign #N" placeholder that used
+  -- to be the only label. Existing rows indexed before this column existed
+  -- get a placeholder via the ADD COLUMN migration's DEFAULT, not left NULL.
+  name                  TEXT NOT NULL,
   organizer_wallet      TEXT NOT NULL,
   contract_campaign_id  TEXT NOT NULL UNIQUE,
   base_rate             INTEGER NOT NULL,

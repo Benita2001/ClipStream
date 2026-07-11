@@ -32,6 +32,14 @@
   color: #0a0a0a;
   margin: 0 0 20px;
 }
+.titleId {
+  font-family: var(--font-mono), monospace;
+  font-size: 15px;
+  font-weight: 400;
+  color: rgba(10, 10, 10, 0.4);
+  margin-left: 10px;
+  vertical-align: middle;
+}
 .description {
   font-size: 14px;
   line-height: 1.5;

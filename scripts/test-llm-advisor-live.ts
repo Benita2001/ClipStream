@@ -81,6 +81,7 @@ async function main() {
   );
 
   const campaign = insertCampaign({
+    name: "LLM Advisor Live Test Campaign",
     organizer_wallet: deployer.address,
     contract_campaign_id: "0",
     base_rate: 100,

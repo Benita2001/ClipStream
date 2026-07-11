@@ -160,7 +160,9 @@ export default function OrganizerProfilePage() {
                   {data.campaigns.map((c) => (
                     <Link key={c.id} href={`/organizer/campaign/${c.id}`} className={styles.campaignRow}>
                       <div className={styles.campaignInfo}>
-                        <div className={styles.campaignName}>Campaign #{c.id}</div>
+                        <div className={styles.campaignName}>
+                          {c.name} <span className={styles.muted}>#{c.id}</span>
+                        </div>
                         <span className={c.status === "active" ? styles.pillActive : styles.pillClosed}>{c.status}</span>
                       </div>
                       <div className={styles.campaignStat}>

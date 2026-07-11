@@ -159,7 +159,8 @@ export default function OrganizerCampaignPage() {
         ) : campaign ? (
           <header className={styles.header}>
             <h1 className={styles.title}>
-              Campaign #{campaign.id}
+              {campaign.name}
+              <span className={styles.titleId}>#{campaign.id}</span>
               {campaign.status === "closed" && <span className={styles.pillClosed}>Closed</span>}
             </h1>
             {campaign.description && <p className={styles.description}>{campaign.description}</p>}
