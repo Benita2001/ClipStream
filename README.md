@@ -11,7 +11,7 @@ Clippers earn as views accrue. Organizers see exactly where every dollar goes.
 
 **Telegram Community:** https://t.me/Clippersarmy
 
-**Telegram Account:** https://x.com/Cryptoclips_
+**Twitter Account:** https://x.com/Cryptoclips_
 
 <img width="1200" height="1200" alt="image" src="https://github.com/user-attachments/assets/2236d0d3-f24d-4e8b-8617-252e88cf2475" />
 
